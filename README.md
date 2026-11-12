@@ -9,8 +9,10 @@ RTX 5070 Laptop GPU (8 GB), Windows 11.
 
 ![The sample portrait speaking a typed line](docs/demo.gif)
 
-Rendered live on the laptop at 25 fps. [The same clip with sound](docs/demo.mp4)
-(the voice is Kokoro; the portrait is the sample image from SoulX-FlashHead).
+Rendered live on the laptop at 25 fps. The same clip with sound is on the
+[Hugging Face showcase page](https://huggingface.co/spaces/skyuu72/talking-avatar)
+and in [docs/demo.mp4](docs/demo.mp4). The voice is Kokoro; the portrait is the
+sample image from SoulX-FlashHead.
 
 ## Run it
 
