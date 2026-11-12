@@ -1,0 +1,28 @@
+# Install PyTorch first, from the CUDA 12.8 index (RTX 50-series needs cu128):
+#   pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cu128
+
+# avatar model (SoulX-FlashHead Lite)
+diffusers==0.36.0
+transformers==4.57.3
+accelerate
+einops
+safetensors
+loguru
+pyloudnorm
+pyyaml
+opencv-python-headless
+scipy
+soundfile
+
+# voice loop
+kokoro-onnx
+faster-whisper
+anthropic
+openai
+
+# server
+fastapi
+uvicorn[standard]
+
+# optional, for run.py --compile on Windows (must match torch: 3.3.x for torch 2.7)
+# triton-windows>=3.3,<3.4
