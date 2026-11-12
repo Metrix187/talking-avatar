@@ -33,6 +33,7 @@ SAMPLE_STEPS = int(os.environ.get("AVATAR_STEPS", "2"))   # 2 = real time on an 
 SAMPLE_SHIFT = 5
 COLOR_CORRECTION = 1.0
 AUDIO_CONTEXT_S = 8            # seconds of audio history fed to wav2vec
+SETTLE_CHUNKS = 6              # chunks discarded after a portrait change (see warmup)
 SIZE = 512
 # Laptop GPU governors lower the clock when the load comes in bursts with idle
 # gaps, which makes each chunk slower than real time (measured here: 700 ms per
@@ -121,13 +122,19 @@ class AvatarEngine:
     # -- portrait ---------------------------------------------------------
     def set_portrait(self, image: Image.Image, face_crop: bool = True, seed: int = 9999):
         """Switch to a new reference image and reset motion and audio context.
-        Raises ValueError if `face_crop` is on and no face can be found."""
+        With `face_crop`, frames the head and shoulders around the detected
+        face. Returns False if no face was found and the middle square of the
+        picture was used instead (common with flat cartoons), else True."""
+        face_found = True
         if face_crop:
             # crop here, not in the vendor pipeline: it swallows detection
             # failures and silently falls back to the uncropped picture
-            from .vendor_shims import crop_portrait
+            from .vendor_shims import center_square, crop_portrait
 
-            image = crop_portrait(image, size=SIZE)
+            try:
+                image = crop_portrait(image, size=SIZE)
+            except ValueError:
+                image, face_found = center_square(image, SIZE), False
         self._portrait_n += 1
         path = Path(self._tmp.name) / f"portrait{self._portrait_n}.png"
         image.convert("RGB").save(path)
@@ -147,6 +154,7 @@ class AvatarEngine:
             self._audio.clear()
             self._audio.extend([0.0] * self._audio.maxlen)
             self.ready = True
+        return face_found
 
     def portrait_preview(self) -> Image.Image:
         """The 512x512 crop the model is actually conditioned on."""
@@ -195,7 +203,11 @@ class AvatarEngine:
                 self._filler @ self._filler
             torch.cuda.synchronize()
 
-    def warmup(self, n: int = 2):
+    def warmup(self, n: int = SETTLE_CHUNKS):
+        """Render and throw away the first chunks after a portrait change.
+        The picture goes soft for a few chunks before it settles (badly so
+        for flat cartoons: sharpness fell to a tenth and took five chunks to
+        come back), so nobody should be shown them."""
         for _ in range(n):
             self.step(None)
 

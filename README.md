@@ -14,6 +14,13 @@ Rendered live on the laptop at 25 fps. The same clip with sound is on the
 and in [docs/demo.mp4](docs/demo.mp4). The voice is Kokoro; the portrait is the
 sample image from SoulX-FlashHead.
 
+It is not limited to photos. Drawn and 3D-animated characters keep their style:
+
+![Three animated characters mid-sentence](docs/characters.jpg)
+
+[Watch them talk](docs/characters.mp4) (13 s, with sound). What works and what
+does not is under [Animated characters](#animated-characters).
+
 ## Run it
 
 ```
@@ -54,8 +61,11 @@ Optional flags:
 - **Mic button** toggles hands-free: it listens for speech and stops after
   0.8 s of silence. It ignores the mic while the avatar is speaking so it
   doesn't hear itself.
-- **Portrait card**: drop in any front-facing photo. Auto-crop finds the face
-  and frames head and shoulders; the model only does 512x512 head shots.
+- **Portrait card**: drop in any front-facing photo or character picture.
+  Auto-crop finds the face and frames head and shoulders; the model only does
+  512x512 head shots. If no face is found (flat cartoons, mostly) the middle
+  square of the picture is used as it is. A new portrait takes about five
+  seconds to settle before it appears.
 - **Voice**: 54 Kokoro voices in nine languages.
 
 ## How it works
@@ -128,6 +138,29 @@ Things that were not obvious:
 The server stops rendering when the tab is hidden and after five minutes
 without anyone talking.
 
+## Animated characters
+
+Tested on seven generated characters: three 3D-animated people, a 3D-animated
+fox, an anime boy and two flat cartoons. All of them animate at the same speed
+as a photo and keep their drawing style. How well they talk depends on the
+character:
+
+- **A clearly drawn mouth lip-syncs well.** 3D-animated faces and a flat
+  cartoon with visible lips open and close their mouths in time with the voice.
+- **A mouth that is a thin line, or hidden, barely moves.** The anime boy and
+  a cartoon man with a moustache blink and shift but hardly lip-sync.
+- **Faces go soft while speaking, some much more than others.** Measured as
+  sharpness of the face area during speech against idle: the sample photo and
+  most characters keep 50-75%, the fox and one of the 3D people only 20-30%,
+  with eyes drifting toward realistic proportions. It comes back when the
+  speech stops. Four denoise steps did not help the worst case.
+- **The first seconds of a new portrait are soft**, badly so for flat
+  cartoons, so the app renders and discards six chunks after a portrait change.
+- **The face detector needed help.** YuNet misses faces that fill its input,
+  which is most character art, so detection now runs at three sizes. It finds
+  the 3D characters and the fox; flat cartoons without a face it recognises
+  fall back to the middle of the picture.
+
 ## Scripts
 
 ```
@@ -186,6 +219,9 @@ other people's models, none of which are included here:
   [faster-whisper](https://github.com/SYSTRAN/faster-whisper) for hearing,
   [wav2vec2](https://huggingface.co/facebook/wav2vec2-base-960h) for audio
   features and [YuNet](https://github.com/opencv/opencv_zoo) for face cropping.
+
+The animated characters in the demo were generated for this project and are
+not from any film or show.
 
 The idea came from Meta's Muse Realtime Avatar demo; this is an independent
 local build and shares nothing with it.

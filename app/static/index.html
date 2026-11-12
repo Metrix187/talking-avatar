@@ -434,12 +434,14 @@ async function upload(file) {
     const r = await fetch("/api/portrait?crop=" + ($("crop").checked ? 1 : 0), { method: "POST", body: file });
     const j = await r.json().catch(() => ({}));
     if (!r.ok || j.ok === false) throw new Error(j.error || j.detail || `upload failed (${r.status})`);
-    note.textContent = "Portrait updated.";
+    note.textContent = j.face_found === false
+      ? "No face found, so the middle of the picture is used as it is. This is normal for flat cartoons; a head-and-shoulders picture works best."
+      : "Portrait updated.";
     flush();
     if (!started) await drawStill();
   } catch (e) {
     note.className = "note err";
-    note.textContent = e.message === "No face detected" ? "No face found in that photo. Try another, or turn off auto-crop." : e.message;
+    note.textContent = e.message;
   }
   $("file").value = "";
 }

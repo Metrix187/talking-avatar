@@ -88,7 +88,7 @@ class Models:
                 cls.engine.set_portrait(Image.open(DEFAULT_PORTRAIT), face_crop=False)
             if not compiling:
                 cls.stage = "warming up the GPU"
-            cls.engine.warmup(4)
+            cls.engine.warmup()
             cls.stage = "loading the voice"
             from .voice import Listener, Speaker
 
@@ -446,20 +446,19 @@ async def set_portrait(request: Request, crop: int = 1):
 
     def apply():
         with Stage.portrait_busy:
-            Models.engine.set_portrait(image, face_crop=bool(crop))
+            face_found = Models.engine.set_portrait(image, face_crop=bool(crop))
             preview = Models.engine.portrait_preview()
+            Models.engine.warmup()                # the first chunks of a new portrait come out soft
         DATA.mkdir(exist_ok=True)
         preview.save(DATA / "portrait.png")       # already cropped; reload without re-detecting
-        return preview
+        return face_found
 
     s = Stage.session
     if s:
         s.interrupt()
-    try:
-        await asyncio.get_running_loop().run_in_executor(None, apply)
-    except ValueError as e:                       # no face found
-        return JSONResponse({"ok": False, "error": str(e)}, status_code=422)
-    return {"ok": True}
+    face_found = await asyncio.get_running_loop().run_in_executor(None, apply)
+    # false = no face found (flat cartoons, mostly): the middle square was used
+    return {"ok": True, "face_found": face_found}
 
 
 # --------------------------------------------------------------------------

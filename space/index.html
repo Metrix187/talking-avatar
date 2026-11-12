@@ -41,6 +41,8 @@
     margin-top: 18px; padding: 12px 14px; border-radius: 12px; background: var(--chip);
     font-size: 0.92rem;
   }
+  .chars { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 24px; align-items: center; }
+  .chars video { width: 100%; aspect-ratio: 1; border-radius: 16px; background: #000; display: block; }
   .flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; padding: 0; margin: 0; list-style: none; }
   .flow li { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
   .flow b { display: block; margin-bottom: 4px; }
@@ -59,6 +61,7 @@
   footer { margin-top: 56px; font-size: 0.88rem; color: var(--muted); }
   @media (max-width: 760px) {
     .hero { grid-template-columns: 1fr; }
+    .chars { grid-template-columns: 1fr; }
     .flow { grid-template-columns: 1fr; }
     .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
@@ -86,6 +89,21 @@
         6 GB of memory, so it runs locally rather than in this Space.</div>
     </div>
   </section>
+
+  <h2>Animated characters too</h2>
+  <div class="chars">
+    <video src="characters.mp4" poster="characters.jpg" controls muted loop playsinline preload="metadata"></video>
+    <div>
+      <p>Drawn and 3D-animated characters keep their style. These three were generated for this
+        project and animated by the same app, on the same laptop.</p>
+      <ul class="plain">
+        <li>A clearly drawn mouth lip-syncs well. A mouth that is a thin line, or hidden under a
+          moustache, barely moves.</li>
+        <li>Faces soften while speaking, and some characters soften much more than others.</li>
+        <li>Flat cartoons often have no face the detector recognises; the picture is then used as it is.</li>
+      </ul>
+    </div>
+  </div>
 
   <h2>How it works</h2>
   <ol class="flow">

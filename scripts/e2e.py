@@ -29,6 +29,7 @@ p.add_argument("--say")
 p.add_argument("--ask")
 p.add_argument("--wav")
 p.add_argument("--interrupt-after", type=float, help="seconds of speech to hear before barging in")
+p.add_argument("--voice", help="Kokoro voice name, e.g. am_michael (default: the server's)")
 p.add_argument("--idle", type=float, default=3.0, help="seconds of idle video before and after")
 p.add_argument("--out", default=str(ROOT / "out" / "e2e.mp4"))
 args = p.parse_args()
@@ -40,6 +41,9 @@ async def main():
         hello = json.loads(await ws.recv())
         chunk_s, rate = hello["chunk_s"], 24000
         print("brain:", hello["brain"])
+        if args.voice:
+            assert args.voice in hello["voices"], f"unknown voice; choose from {hello['voices']}"
+            await ws.send(json.dumps({"type": "voice", "voice": args.voice}))
         t0 = time.monotonic()
         play_until = t0                     # when our pretend speaker runs out
         sent_at = first_speech = speech_end = None
